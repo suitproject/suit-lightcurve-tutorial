@@ -1,6 +1,6 @@
 # Analyzing a Solar Flare with SUIT Data: Light Curve Tutorial
 
-This tutorial guides you through the process of analyzing a solar flare using multi-wavelength data from the Solar Ultraviolet Imaging Telescope (SUIT). We will start with raw FITS files, perform crucial pre-processing steps like exposure normalization and image co-alignment, and finally generate and plot light curves for the flare from a defined region of interest.
+This tutorial guides you through the process of analysing a solar flare using multi-wavelength data from the Solar Ultraviolet Imaging Telescope (SUIT). We will start with raw FITS files, perform crucial pre-processing steps like exposure normalisation and image co-alignment, and finally generate and plot light curves for the flare from a defined region of interest.
 
 The primary steps in this workflow are:
 1.  **Setup**: Importing necessary libraries.
@@ -9,10 +9,13 @@ The primary steps in this workflow are:
 4.  **Image Co-alignment**: Spatially aligning all images across different filters and over time.
 5.  **Region of Interest (ROI) Selection**: Defining the flaring region using an intensity contour.
 6.  **Light Curve Generation**: Creating time-series data from the ROI.
-7.  **Visualization & Export**: Plotting the light curves against GOES data and saving the results.
+7.  **Visualisation & Export**: Plotting the light curves against GOES data and saving the results.
 
 > **Important Note on Memory Usage**:
-> The `sunpy.map.MapSequence.peek()` function provides a fantastic interactive way to view image sequences. However, it can consume a significant amount of memory, and figures may not be cleared automatically. If your notebook becomes slow after using `peek()` multiple times, the simplest solution is to restart the kernel and run the cells again. You can use `.plot()` for a non-interactive view to conserve memory.
+> Beware that the peek function, even though it provides a nice interactive way to view your maps but clogs your memory.
+As of now I still havent found a way to clear the figures from the memory. So the more you use the peek function, the
+> slower the code will get. You can avoid it by using plot instead of peek, but it will be a lot less interactive.
+If the code gets very slow just restart the kernal start again with your new insights ..
 
 ## 1. Setup and Imports
 
