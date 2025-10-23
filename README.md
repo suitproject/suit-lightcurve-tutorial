@@ -1,6 +1,6 @@
-# Analyzing a Solar Flare with SUIT Data: Light Curve Tutorial
+# Analysing a Solar Flare with SUIT Data: Light Curve Tutorial
 
-This tutorial guides you through the process of analyzing a solar flare using multi-wavelength data from the Solar Ultraviolet Imaging Telescope (SUIT). We will start with raw FITS files, perform crucial pre-processing steps like exposure normalization and image co-alignment, and finally generate and plot light curves for the flare from a defined region of interest.
+This tutorial guides you through the process of analysing a solar flare using multi-wavelength data from the Solar Ultraviolet Imaging Telescope (SUIT). We will start with raw FITS files, perform crucial pre-processing steps like exposure normalization and image co-alignment, and finally generate and plot light curves for the flare from a defined region of interest.
 
 The primary steps in this workflow are:
 1.  **Setup**: Importing necessary libraries.
@@ -9,14 +9,15 @@ The primary steps in this workflow are:
 4.  **Image Co-alignment**: Spatially aligning all images across different filters and over time.
 5.  **Region of Interest (ROI) Selection**: Defining the flaring region using an intensity contour.
 6.  **Light Curve Generation**: Creating time-series data from the ROI.
-7.  **Visualization & Export**: Plotting the light curves against GOES data and saving the results.
+7.  **Visualisation & Export**: Plotting the light curves against GOES data and saving the results.
 
 > **Important Note on Memory Usage**:
-> The `sunpy.map.MapSequence.peek()` function provides a fantastic interactive way to view image sequences. However, it can consume a significant amount of memory, and figures may not be cleared automatically. If your notebook becomes slow after using `peek()` multiple times, the simplest solution is to restart the kernel and run the cells again. You can use `.plot()` for a non-interactive view to conserve memory.
+Beware that the peek function, although it provides a nice interactive way to view your maps, clogs your memory.
+As of now, I still haven't found a way to clear the figures from the memory. The more you use the peek function, the slower the code will become. You can avoid it by using plot instead of peek, but it will be a lot less interactive. If the code gets very slow, just restart the kernel and start again with your new insights.
 
 ## 1. Setup and Imports
 
-First, let's set up our environment by importing the required libraries. We'll use `sunpy` and `sunkit-image` for solar data analysis, `astropy` for units and coordinates, and `matplotlib` for plotting.
+First, import the required libraries. We'll use `sunpy` and `sunkit-image` for solar data analysis, `astropy` for units and coordinates, and `matplotlib` for plotting.
 
 ```python
 # Set up interactive plotting in a separate window
@@ -33,7 +34,6 @@ from itertools import zip_longest
 
 import astropy.units as u
 from astropy.coordinates import SkyCoord
-from matplotlib.path import Path
 from sunpy import timeseries as ts
 from tqdm import tqdm
 
@@ -49,10 +49,10 @@ from matplotlib.colors import PowerNorm
 
 ## 2. Helper Functions
 
-To keep our main workflow clean and organized, we'll define a few helper functions. These functions encapsulate repetitive tasks like normalization, co-alignment, and light curve generation.
+To keep our main workflow clean and organised, we'll define a few helper functions. These functions encapsulate repetitive tasks like normalization, co-alignment, and light curve generation.
 
-### Exposure Normalization
-This function normalizes the image data by its exposure time. This is crucial for comparing images taken with different exposure settings. The function divides each image's data by its exposure time and updates the metadata to reflect a standard 1-second exposure.
+### Exposure Normalisation
+This function normalises the image data by its exposure time. This is crucial for comparing images taken with different exposure settings. The function divides each image's data by its exposure time and updates the metadata to reflect a standard 1-second exposure.
 
 ```python
 def exp_norm(map_sequence):
@@ -100,7 +100,8 @@ def submap_with_ginput(sunpy_map):
 ```
 
 ### Co-alignment Wrapper
-This function simplifies the process of co-aligning a sequence of maps. It uses `sunkit-image` to calculate the shifts required to align each map to a reference template and then applies those shifts.
+This function simplifies the process of co-aligning a sequence of maps. It uses `sunkit-image` to calculate the shifts required to align each map to a reference template and then applies those shifts. Checkthe  Coalignment module for more info.
+Visit https://docs.sunpy.org/projects/sunkit-image/en/latest/code_ref/coalignment.html to know more about the functions used
 
 ```python
 def co_align(map_sequence, template, layer_index=0, clip=False):
@@ -110,15 +111,12 @@ def co_align(map_sequence, template, layer_index=0, clip=False):
     shifts = cal_shift(map_sequence, layer_index=layer_index, template=template)
     plate_scale = map_sequence[0].scale[0]
     
-    coaligned_maps = apply_shifts(map_sequence, 
-                                  xshift=-shifts['x']/plate_scale, 
-                                  yshift=-shifts['y']/plate_scale, 
-                                  clip=clip)
+    coaligned_maps = apply_shifts(map_sequence, xshift=-shifts['x']/plate_scale, yshift=-shifts['y']/plate_scale, clip=clip)
     return coaligned_maps
 ```
 
 ### Cropping a Map Sequence
-This function crops all maps in a sequence to the dimensions of a sample map, ensuring that all images have a consistent size.
+This function crops all maps in a sequence to the dimensions of a sample map, ensuring that all images have a consistent size and similar FOV.
 
 ```python
 def crop_maps(mc, sample):
@@ -177,7 +175,7 @@ def make_lc(mask, map_sequence):
 
 ## 3. Loading and Pre-processing the Data
 
-Now, let's load the FITS files for each of the 8 SUIT narrow-band filters. We will perform exposure normalization and crop them all to the same size. We start with the NB03 filter, which we will use as our reference.
+Now, let's load the FITS files for each of the 8 SUIT narrow-band filters. We will perform exposure normalisation and crop them all to the same size. We start with the NB03 filter, which we will use as our reference.
 
 ```python
 basepath = 'data/'
@@ -238,29 +236,43 @@ Next, we create a temporary map sequence containing only the first frame from ea
 
 ```python
 # Create a map sequence of the first images from all filters.
-temp = Map(smaps1[0], smaps2[0], smaps3[0], smaps4[0], smaps5[0], smaps6[0], smaps7[0], smaps8[0], sequence=True)
 
-# Align the images using the template (index 2 corresponds to NB03 in the 'temp' sequence)
+temp = Map(smaps1[0], smaps2[0], smaps3[0], smaps4[0], smaps5[0], smaps6[0], smaps7[0], smaps8[0], sequence=True)
+for i,tmap in enumerate(temp):
+    print(i,'    ',tmap.meta['ftr_name']) #this just shows index of a particular filter. Use this index to align 
+
+# Align the images using the template
+
 temp_aligned = co_align(temp, layer_index=2, template=template)
+#index=2 corresponds to NB03 in the 'temp' sequence. Map() sorts maps based on observation time. With the sample data provided, index=2 should relate to the index of NB03 filter. You are free to choose whatever filter you want, all other filters will be aligned to layer_index provided.
+
 temp_aligned.peek(); plt.show()
+```
+
+If the coalignment does not work, try using a different template. The template provided below will only work with the sample data. Selecting a template is a trail and error process. Don't be discouraged. Have a look at the coalignment module for tips to make a template if you havent already.
+```python
+bottom_left = SkyCoord(-407*u.arcsec, 397*u.arcsec, frame=smaps3[0].coordinate_frame)
+top_right = SkyCoord(-348*u.arcsec, 442*u.arcsec, frame=smaps3[0].coordinate_frame)
+template1 = smaps3[0].submap(bottom_left,top_right=top_right)
+template1.plot()
 ```
 
 Finally, we replace the original first frame of each filter's map sequence with these newly aligned frames. This ensures our reference frame for the next step is correctly registered across all wavelengths.
 
 ```python
 # Replace the first map of each sequence with the aligned one.
-# NOTE: The indices here depend on the order in 'temp'. Adjust if needed.
-smaps1.maps[0] = temp_aligned[0]
-smaps2.maps[0] = temp_aligned[1]
-smaps3.maps[0] = temp_aligned[2]
-smaps4.maps[0] = temp_aligned[3]
-smaps5.maps[0] = temp_aligned[4]
-smaps6.maps[0] = temp_aligned[5]
-smaps7.maps[0] = temp_aligned[6]
-smaps8.maps[0] = temp_aligned[7]
+# In this particular case I am manually giving the indices, for any other case please supply the indices accordingly.
+smaps1.maps[0] = temp_aligned[3]  #because index=3 corresponds to NB01 in temp_aligned, follow the same logic for other filters.
+smaps2.maps[0] = temp_aligned[6]
+smaps3.maps[0] = temp_aligned[5]
+smaps4.maps[0] = temp_aligned[4]
+smaps5.maps[0] = temp_aligned[7]
+smaps6.maps[0] = temp_aligned[0]
+smaps7.maps[0] = temp_aligned[1]
+smaps8.maps[0] = temp_aligned[2]
 ```
 
-### Step 4.2: Intra-Filter Alignment (Correcting for Time Drift)
+### Step 4.2: Intra-Filter Alignment
 
 Now we align all images within each filter's time series to its aligned first image. We use our interactive `align` function for this. This step corrects for satellite pointing drift over time.
 
