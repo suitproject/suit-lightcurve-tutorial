@@ -255,7 +255,7 @@ for i,tmap in enumerate(temp):
 #(format---> 'filter':index). This will be useful in the next step. 
 ```
 
-If the coalignment does not work, try using a different template. The template provided below will only work with the sample data. Selecting a template is a trail and error process. Don't be discouraged. Have a look at the coalignment module for tips to make a template if you havent already.
+If the coalignment does not work, try using a different template. The template provided below will only work with the sample data. Selecting a template is a trial-and-error process. Don't be discouraged. Have a look at the coalignment module for tips to make a template if you haven't already.
 ```python
 bottom_left = SkyCoord(-407*u.arcsec, 397*u.arcsec, frame=smaps3[0].coordinate_frame)
 top_right = SkyCoord(-348*u.arcsec, 442*u.arcsec, frame=smaps3[0].coordinate_frame)
