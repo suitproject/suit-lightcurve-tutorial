@@ -240,9 +240,10 @@ Next, we create a temporary map sequence containing only the first frame from ea
 temp = Map(smaps1[0], smaps2[0], smaps3[0], smaps4[0], smaps5[0], smaps6[0], smaps7[0], smaps8[0], sequence=True)
 for i,tmap in enumerate(temp):
     print(i,'    ',tmap.meta['ftr_name']) #this just shows index of a particular filter. Use this index to align 
+```
 
-# Align the images using the template
-
+Now we align the images using the template
+```python
 temp_aligned = co_align(temp, layer_index=2, template=template)
 #index=2 corresponds to NB03 in the 'temp' sequence. Map() sorts maps based on observation time. With the sample data provided, index=2 should relate to the index of the NB03 filter. You are free to choose whatever filter you want; all other filters will be aligned to the layer_index provided.
 
