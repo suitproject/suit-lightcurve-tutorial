@@ -1,6 +1,8 @@
 # Analysing a Solar Flare with SUIT Data: Light Curve Tutorial
 
-This tutorial guides you through the process of analysing a solar flare using multi-wavelength data from the Solar Ultraviolet Imaging Telescope (SUIT). We will start with raw FITS files, perform crucial pre-processing steps like exposure normalization and image co-alignment, and finally generate and plot light curves for the flare from a defined region of interest.
+This tutorial guides you through the process of analysing a solar flare using multi-wavelength data from the Solar Ultraviolet Imaging Telescope (SUIT). 
+We will start with raw FITS files, perform crucial pre-processing steps like exposure normalization and image co-alignment, and finally generate
+and plot light curves for the flare from a defined region of interest.
 
 The primary steps in this workflow are:
 1.  **Setup**: Importing necessary libraries.
@@ -49,10 +51,12 @@ from matplotlib.colors import PowerNorm
 
 ## 2. Helper Functions
 
-To keep our main workflow clean and organised, we'll define a few helper functions. These functions encapsulate repetitive tasks like exposure normalisation, co-alignment, and light curve generation.
+To keep our main workflow clean and organised, we'll define a few helper functions. These functions encapsulate repetitive tasks like 
+exposure normalisation, co-alignment, and light curve generation.
 
 ### Exposure Normalisation
-This function normalises the image data by its exposure time. This is crucial for comparing images taken with different exposure settings. The function divides each image's data by its exposure time and updates the metadata to reflect a standard 1-second exposure.
+This function normalises the image data by its exposure time. This is crucial for comparing images taken with different exposure settings. 
+The function divides each image's data by its exposure time and updates the metadata to reflect a standard 1-second exposure.
 
 ```python
 def exp_norm(map_sequence):
@@ -71,7 +75,8 @@ def exp_norm(map_sequence):
 ```
 
 ### Interactive Submap Selection
-This function allows you to interactively select a rectangular region of interest (ROI) from an image by clicking on two opposite corners. It's useful for creating templates for co-alignment.
+This function allows you to interactively select a rectangular region of interest (ROI) from an image 
+by clicking on two opposite corners. It's useful for creating templates for co-alignment.
 
 ```python
 def submap_with_ginput(sunpy_map):
@@ -100,7 +105,8 @@ def submap_with_ginput(sunpy_map):
 ```
 
 ### Co-alignment Wrapper
-This function simplifies the process of co-aligning a sequence of maps. It uses `sunkit-image` to calculate the shifts required to align each map to a reference template and then applies those shifts. Checkthe  Coalignment module for more info.
+This function simplifies the process of co-aligning a sequence of maps. It uses `sunkit-image` to calculate the shifts 
+required to align each map to a reference template and then applies those shifts. Checkthe  Coalignment module for more info.
 Visit https://docs.sunpy.org/projects/sunkit-image/en/latest/code_ref/coalignment.html to know more about the functions used
 
 ```python
@@ -135,7 +141,8 @@ def crop_maps(mc, sample):
 ```
 
 ### Interactive Alignment Workflow
-This function combines submap selection and co-alignment into a single interactive workflow. It prompts you to select a template from the first image and then aligns the entire sequence to it.
+This function combines submap selection and co-alignment into a single interactive workflow. 
+It prompts you to select a template from the first image and then aligns the entire sequence to it.
 
 ```python
 def align(mc, index=0):
@@ -175,7 +182,8 @@ def make_lc(mask, map_sequence):
 
 ## 3. Loading and Pre-processing the Data
 
-Now, let's load the FITS files for each of the 8 SUIT narrow-band filters. We will perform exposure normalisation and crop them all to the same size. We start with the NB03 filter, which we will use as our reference.
+Now, let's load the FITS files for each of the 8 SUIT narrow-band filters. We will perform exposure normalisation 
+and crop them all to the same size. We start with the NB03 filter, which we will use as our reference.
 
 ```python
 basepath = 'data/'
@@ -245,7 +253,9 @@ for i,tmap in enumerate(temp):
 Now we align the images using the template
 ```python
 temp_aligned = co_align(temp, layer_index=2, template=template)
-#index=2 corresponds to NB03 in the 'temp' sequence. Map() sorts maps based on observation time. With the sample data provided, index=2 should relate to the index of the NB03 filter. You are free to choose whatever filter you want; all other filters will be aligned to the layer_index provided.
+#index=2 corresponds to NB03 in the 'temp' sequence. Map() sorts maps based on observation time.
+#With the sample data provided, index=2 should relate to the index of the NB03 filter.
+#You are free to choose whatever filter you want; all other filters will be aligned to the layer_index provided.
 
 temp_aligned.peek(); plt.show()
 
