@@ -49,7 +49,7 @@ from matplotlib.colors import PowerNorm
 
 ## 2. Helper Functions
 
-To keep our main workflow clean and organised, we'll define a few helper functions. These functions encapsulate repetitive tasks like normalization, co-alignment, and light curve generation.
+To keep our main workflow clean and organised, we'll define a few helper functions. These functions encapsulate repetitive tasks like exposure normalisation, co-alignment, and light curve generation.
 
 ### Exposure Normalisation
 This function normalises the image data by its exposure time. This is crucial for comparing images taken with different exposure settings. The function divides each image's data by its exposure time and updates the metadata to reflect a standard 1-second exposure.
@@ -244,9 +244,15 @@ for i,tmap in enumerate(temp):
 # Align the images using the template
 
 temp_aligned = co_align(temp, layer_index=2, template=template)
-#index=2 corresponds to NB03 in the 'temp' sequence. Map() sorts maps based on observation time. With the sample data provided, index=2 should relate to the index of NB03 filter. You are free to choose whatever filter you want, all other filters will be aligned to layer_index provided.
+#index=2 corresponds to NB03 in the 'temp' sequence. Map() sorts maps based on observation time. With the sample data provided, index=2 should relate to the index of the NB03 filter. You are free to choose whatever filter you want; all other filters will be aligned to the layer_index provided.
 
 temp_aligned.peek(); plt.show()
+
+filter_index = {}
+for i,tmap in enumerate(temp):
+    filter_index[f"{tmap.meta['ftr_name']}"] = i
+#filter_index is a dictionary to store the index of different filters from temp
+(format---> 'filter':index). This will be useful in the next step. 
 ```
 
 If the coalignment does not work, try using a different template. The template provided below will only work with the sample data. Selecting a template is a trail and error process. Don't be discouraged. Have a look at the coalignment module for tips to make a template if you havent already.
@@ -261,15 +267,15 @@ Finally, we replace the original first frame of each filter's map sequence with 
 
 ```python
 # Replace the first map of each sequence with the aligned one.
-# In this particular case I am manually giving the indices, for any other case please supply the indices accordingly.
-smaps1.maps[0] = temp_aligned[3]  #because index=3 corresponds to NB01 in temp_aligned, follow the same logic for other filters.
-smaps2.maps[0] = temp_aligned[6]
-smaps3.maps[0] = temp_aligned[5]
-smaps4.maps[0] = temp_aligned[4]
-smaps5.maps[0] = temp_aligned[7]
-smaps6.maps[0] = temp_aligned[0]
-smaps7.maps[0] = temp_aligned[1]
-smaps8.maps[0] = temp_aligned[2]
+# We use the dictionary created earlier to extract the aligned image of a particular filter correspondin to that map_sequence.
+smaps1.maps[0]  = temp[filter_index[f"{smaps1[1].meta['ftr_name']}"]]
+smaps2.maps[0]  = temp[filter_index[f"{smaps2[1].meta['ftr_name']}"]]
+smaps3.maps[0]  = temp[filter_index[f"{smaps3[1].meta['ftr_name']}"]]
+smaps4.maps[0]  = temp[filter_index[f"{smaps4[1].meta['ftr_name']}"]]
+smaps5.maps[0]  = temp[filter_index[f"{smaps5[1].meta['ftr_name']}"]]
+smaps6.maps[0]  = temp[filter_index[f"{smaps6[1].meta['ftr_name']}"]]
+smaps7.maps[0]  = temp[filter_index[f"{smaps7[1].meta['ftr_name']}"]]
+smaps8.maps[0]  = temp[filter_index[f"{smaps8[1].meta['ftr_name']}"]]
 ```
 
 ### Step 4.2: Intra-Filter Alignment
